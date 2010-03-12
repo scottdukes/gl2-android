@@ -1,4 +1,4 @@
-package com.badlogic.gdx.backends.android;
+package com.badlogic.gdx;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -11,6 +11,7 @@ import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.opengles.GL10;
 
+import com.badlogic.gdx.backends.android.AndroidGL20;
 import com.badlogic.gdx.backends.android.surfaceview.GLSurfaceView;
 import com.badlogic.gdx.backends.android.surfaceview.GLSurfaceView20;
 import com.badlogic.gdx.backends.android.surfaceview.GLSurfaceView.Renderer;
