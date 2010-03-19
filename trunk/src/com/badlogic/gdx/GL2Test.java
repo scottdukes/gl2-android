@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.nio.ShortBuffer;
 
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
@@ -81,7 +82,10 @@ public class GL2Test extends Activity
     {
     	AndroidGL20 gl2 = new AndroidGL20();
     	FloatBuffer vertices;
+    	ShortBuffer indices;
     	int program;
+    	int vboVertexHandle;
+    	int vboIndexHandle;
     	int viewportWidth, viewportHeight;
 
 		@Override
@@ -93,10 +97,13 @@ public class GL2Test extends Activity
 			gl2.glViewport ( 0, 0, viewportWidth, viewportHeight  );					
 			gl2.glUseProgram ( program );
 			 
-			gl2.glVertexAttribPointer ( 0, 3, GL20.GL_FLOAT, false, 0, vertices );
 			gl2.glEnableVertexAttribArray ( 0 );
+			gl2.glBindBuffer( GL20.GL_ARRAY_BUFFER, vboVertexHandle );
+			gl2.glVertexAttribPointer ( 0, 3, GL20.GL_FLOAT, false, 0, 0 );			
 			
-			gl2.glDrawArrays ( GL20.GL_TRIANGLES, 0, 3 );
+			gl2.glBindBuffer( GL20.GL_ELEMENT_ARRAY_BUFFER, vboIndexHandle );
+			gl2.glDrawElements( GL20.GL_TRIANGLES, 3, GL20.GL_UNSIGNED_SHORT, 0 );
+			gl2.glFinish();
 		}
 
 		@Override
@@ -160,6 +167,30 @@ public class GL2Test extends Activity
 			vertices = tmp.asFloatBuffer();
 			vertices.put( vVertices );
 			vertices.position(0);
+			
+			intbuf.position(0);
+			gl2.glGenBuffers( 1, intbuf );
+			vboVertexHandle = intbuf.get(0);
+			
+			gl2.glBindBuffer( GL20.GL_ARRAY_BUFFER, vboVertexHandle );
+			gl2.glBufferData( GL20.GL_ARRAY_BUFFER, 3 * 3 * 4, vertices, GL20.GL_STATIC_DRAW  );
+			gl2.glBindBuffer( GL20.GL_ARRAY_BUFFER, 0 );
+			
+			short vIndices[] = { 0, 1, 2 };
+			tmp = ByteBuffer.allocateDirect( 3 * 2 );
+			tmp.order(ByteOrder.nativeOrder());
+			indices = tmp.asShortBuffer();
+			indices.put( vIndices );
+			indices.position(0);
+			
+			intbuf.position(0);
+			gl2.glGenBuffers( 1, intbuf );
+			vboIndexHandle = intbuf.get(0);
+			
+			gl2.glBindBuffer( GL20.GL_ELEMENT_ARRAY_BUFFER, vboIndexHandle );
+			gl2.glBufferData( GL20.GL_ELEMENT_ARRAY_BUFFER, 3 * 2, indices, GL20.GL_STATIC_DRAW );
+			gl2.glBindBuffer( GL20.GL_ELEMENT_ARRAY_BUFFER, 0 );
+				
 		}
     	
 		private int loadShader( int type, String source )

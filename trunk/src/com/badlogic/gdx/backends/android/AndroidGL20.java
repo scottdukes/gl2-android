@@ -100,6 +100,8 @@ public class AndroidGL20 implements GL20
 	public native void glDrawArrays ( int mode, int first, int count );
 
 	public native void glDrawElements ( int mode, int count, int type, Buffer indices );
+	
+	public native void glDrawElements ( int mode, int count, int type, int indices );
 
 	public native void glEnable ( int cap );
 
@@ -298,6 +300,8 @@ public class AndroidGL20 implements GL20
 	public native void glVertexAttrib4fv ( int indx, FloatBuffer values );
 
 	public native void glVertexAttribPointer ( int indx, int size, int type, boolean normalized, int stride, Buffer ptr );
+	
+	public native void glVertexAttribPointer ( int indx, int size, int type, boolean normalized, int stride, int ptr );
 
 	public native void glViewport ( int x, int y, int width, int height );
 }
