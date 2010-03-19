@@ -348,8 +348,16 @@ JNIEXPORT void JNICALL Java_com_badlogic_gdx_backends_android_AndroidGL20_glDraw
  * Method:    glDrawElements
  * Signature: (IIILjava/nio/Buffer;)V
  */
-JNIEXPORT void JNICALL Java_com_badlogic_gdx_backends_android_AndroidGL20_glDrawElements
+JNIEXPORT void JNICALL Java_com_badlogic_gdx_backends_android_AndroidGL20_glDrawElements__IIILjava_nio_Buffer_2
   (JNIEnv *, jobject, jint, jint, jint, jobject);
+
+/*
+ * Class:     com_badlogic_gdx_backends_android_AndroidGL20
+ * Method:    glDrawElements
+ * Signature: (IIII)V
+ */
+JNIEXPORT void JNICALL Java_com_badlogic_gdx_backends_android_AndroidGL20_glDrawElements__IIII
+  (JNIEnv *, jobject, jint, jint, jint, jint);
 
 /*
  * Class:     com_badlogic_gdx_backends_android_AndroidGL20
@@ -1140,8 +1148,16 @@ JNIEXPORT void JNICALL Java_com_badlogic_gdx_backends_android_AndroidGL20_glVert
  * Method:    glVertexAttribPointer
  * Signature: (IIIZILjava/nio/Buffer;)V
  */
-JNIEXPORT void JNICALL Java_com_badlogic_gdx_backends_android_AndroidGL20_glVertexAttribPointer
+JNIEXPORT void JNICALL Java_com_badlogic_gdx_backends_android_AndroidGL20_glVertexAttribPointer__IIIZILjava_nio_Buffer_2
   (JNIEnv *, jobject, jint, jint, jint, jboolean, jint, jobject);
+
+/*
+ * Class:     com_badlogic_gdx_backends_android_AndroidGL20
+ * Method:    glVertexAttribPointer
+ * Signature: (IIIZII)V
+ */
+JNIEXPORT void JNICALL Java_com_badlogic_gdx_backends_android_AndroidGL20_glVertexAttribPointer__IIIZII
+  (JNIEnv *, jobject, jint, jint, jint, jboolean, jint, jint);
 
 /*
  * Class:     com_badlogic_gdx_backends_android_AndroidGL20

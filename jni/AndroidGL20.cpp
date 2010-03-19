@@ -241,7 +241,7 @@ JNIEXPORT void JNICALL Java_com_badlogic_gdx_backends_android_AndroidGL20_glBuff
   (JNIEnv * env, jobject, jint target, jint size, jobject data, jint usage)
 {
 	void* dataPtr = getDirectBufferPointer( env, data );
-	glBufferData( target, size, data,  usage );
+	glBufferData( target, size, dataPtr, usage );
 }
 
 /*
@@ -564,11 +564,18 @@ JNIEXPORT void JNICALL Java_com_badlogic_gdx_backends_android_AndroidGL20_glDraw
  * Method:    glDrawElements
  * Signature: (IIILjava/nio/Buffer;)V
  */
-JNIEXPORT void JNICALL Java_com_badlogic_gdx_backends_android_AndroidGL20_glDrawElements
-  (JNIEnv *env, jobject, jint mode, jint count, jint type, jobject indices)
+JNIEXPORT void JNICALL Java_com_badlogic_gdx_backends_android_AndroidGL20_glDrawElements__IIILjava_nio_Buffer_2
+(JNIEnv *env, jobject, jint mode, jint count, jint type, jobject indices)
 {
 	void* dataPtr = getDirectBufferPointer( env, indices );
-	glDrawElements( mode, count, type, indices );
+	//__android_log_print(ANDROID_LOG_INFO, "GL2", "drawelements");
+	glDrawElements( mode, count, type, dataPtr );
+}
+
+JNIEXPORT void JNICALL Java_com_badlogic_gdx_backends_android_AndroidGL20_glDrawElements__IIII
+  (JNIEnv *, jobject, jint mode, jint count, jint type, jint indices)
+{
+	glDrawElements( mode, count, type, (const void*)indices );
 }
 
 /*
@@ -1726,11 +1733,17 @@ JNIEXPORT void JNICALL Java_com_badlogic_gdx_backends_android_AndroidGL20_glVert
  * Method:    glVertexAttribPointer
  * Signature: (IIIZILjava/nio/Buffer;)V
  */
-JNIEXPORT void JNICALL Java_com_badlogic_gdx_backends_android_AndroidGL20_glVertexAttribPointer
+JNIEXPORT void JNICALL Java_com_badlogic_gdx_backends_android_AndroidGL20_glVertexAttribPointer__IIIZILjava_nio_Buffer_2
   (JNIEnv *env, jobject, jint indx, jint size, jint type, jboolean normalized, jint stride, jobject ptr)
 {
 	void* dataPtr = getDirectBufferPointer( env, ptr );
 	glVertexAttribPointer( indx, size, type, normalized, stride, dataPtr );
+}
+
+JNIEXPORT void JNICALL Java_com_badlogic_gdx_backends_android_AndroidGL20_glVertexAttribPointer__IIIZII
+  (JNIEnv *, jobject, jint indx, jint size, jint type, jboolean normalized, jint stride, jint ptr)
+{
+	glVertexAttribPointer( indx, size, type, normalized, stride, (const void*)ptr );
 }
 
 /*
