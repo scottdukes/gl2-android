@@ -128,46 +128,22 @@ public class GL2Test extends Activity
 		      						   "}                                            \n";
 			
 			int vertexShader = loadShader( GL20.GL_VERTEX_SHADER, vertexShaderSrc );
-			int fragmentShader = loadShader( GL20.GL_FRAGMENT_SHADER, fragmentShaderSrc );
-			program = gl2.glCreateProgram();
-			if( program == 0 )
-				throw new RuntimeException( "creating program didn't work" );
-			
-			gl2.glAttachShader( program, vertexShader );
-			gl2.glAttachShader( program, fragmentShader );
-			
-			gl2.glBindAttribLocation( program, 0, "vPosition" );
-			gl2.glLinkProgram( program );
-			
-			ByteBuffer tmp = ByteBuffer.allocateDirect(4);
-			tmp.order(ByteOrder.nativeOrder());
-			IntBuffer intbuf = tmp.asIntBuffer();
-			
-			gl2.glGetProgramiv( program, GL20.GL_LINK_STATUS, intbuf );
-			int linked = intbuf.get(0);
-			if( linked == 0 )
-			{
-				gl2.glGetProgramiv( program, GL20.GL_INFO_LOG_LENGTH, intbuf );
-				int infoLogLength = intbuf.get(0);
-				if( infoLogLength > 1 )
-				{
-					Log.d( "GL2", "couldn't link program: " + gl2.glGetProgramInfoLog( program ) );					
-				}
-				
-				throw new RuntimeException( "Creating program didn't work" );
-			}
-			
+			int fragmentShader = loadShader( GL20.GL_FRAGMENT_SHADER, fragmentShaderSrc );			
+			program = createProgram( vertexShader, fragmentShader );
 			
 			float vVertices[] = {  0.0f,  0.5f, 0.0f, 
                        			   -0.5f, -0.5f, 0.0f,
                        			   0.5f, -0.5f, 0.0f };	
 			
-			tmp = ByteBuffer.allocateDirect( 3 * 3 * 4 );
+			ByteBuffer tmp = ByteBuffer.allocateDirect( 3 * 3 * 4 );
 			tmp.order(ByteOrder.nativeOrder());
 			vertices = tmp.asFloatBuffer();
 			vertices.put( vVertices );
 			vertices.position(0);
 			
+			tmp = ByteBuffer.allocateDirect( 4 );
+			tmp.order(ByteOrder.nativeOrder());			
+			IntBuffer intbuf = tmp.asIntBuffer();
 			intbuf.position(0);
 			gl2.glGenBuffers( 1, intbuf );
 			vboVertexHandle = intbuf.get(0);
@@ -219,6 +195,38 @@ public class GL2Test extends Activity
 			}
 			
 			return shader;
+		}
+		
+		private int createProgram( int vertexShader, int fragmentShader )
+		{
+			int program = gl2.glCreateProgram();
+			if( program == 0 )
+				throw new RuntimeException( "creating program didn't work" );
+			
+			gl2.glAttachShader( program, vertexShader );
+			gl2.glAttachShader( program, fragmentShader );
+			
+			gl2.glBindAttribLocation( program, 0, "vPosition" );
+			gl2.glLinkProgram( program );
+			
+			ByteBuffer tmp = ByteBuffer.allocateDirect(4);
+			tmp.order(ByteOrder.nativeOrder());
+			IntBuffer intbuf = tmp.asIntBuffer();
+			
+			gl2.glGetProgramiv( program, GL20.GL_LINK_STATUS, intbuf );
+			int linked = intbuf.get(0);
+			if( linked == 0 )
+			{
+				gl2.glGetProgramiv( program, GL20.GL_INFO_LOG_LENGTH, intbuf );
+				int infoLogLength = intbuf.get(0);
+				if( infoLogLength > 1 )
+				{
+					Log.d( "GL2", "couldn't link program: " + gl2.glGetProgramInfoLog( program ) );					
+				}
+				
+				throw new RuntimeException( "Creating program didn't work" );
+			}
+			return program;
 		}
     }
 }
