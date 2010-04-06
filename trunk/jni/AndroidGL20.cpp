@@ -29,16 +29,12 @@ nativeClassInitBuffer(JNIEnv *_env)
     jclass bufferClassLocal = _env->FindClass("java/nio/Buffer");
     bufferClass = (jclass) _env->NewGlobalRef(bufferClassLocal);
 
-    getBasePointerID = _env->GetStaticMethodID(nioAccessClass,
-            "getBasePointer", "(Ljava/nio/Buffer;)J");
-    getBaseArrayID = _env->GetStaticMethodID(nioAccessClass,
-            "getBaseArray", "(Ljava/nio/Buffer;)Ljava/lang/Object;");
-    getBaseArrayOffsetID = _env->GetStaticMethodID(nioAccessClass,
-            "getBaseArrayOffset", "(Ljava/nio/Buffer;)I");
+    getBasePointerID = _env->GetStaticMethodID(nioAccessClass, "getBasePointer", "(Ljava/nio/Buffer;)J");
+    getBaseArrayID = _env->GetStaticMethodID(nioAccessClass, "getBaseArray", "(Ljava/nio/Buffer;)Ljava/lang/Object;");
+    getBaseArrayOffsetID = _env->GetStaticMethodID(nioAccessClass,"getBaseArrayOffset", "(Ljava/nio/Buffer;)I");
     positionID = _env->GetFieldID(bufferClass, "position", "I");
     limitID = _env->GetFieldID(bufferClass, "limit", "I");
-    elementSizeShiftID =
-        _env->GetFieldID(bufferClass, "_elementSizeShift", "I");
+    elementSizeShiftID = _env->GetFieldID(bufferClass, "_elementSizeShift", "I");
 }
 
 static void
@@ -82,6 +78,46 @@ static const char* getString( JNIEnv *env, jstring string )
 static void releaseString( JNIEnv *env, jstring string, const char* cString )
 {
 	env->ReleaseStringUTFChars(string, cString);
+}
+
+static void *
+getPointer(JNIEnv *_env, jobject buffer, jarray *array, jint *remaining)
+{
+    jint position;
+    jint limit;
+    jint elementSizeShift;
+    jlong pointer;
+    jint offset;
+    void *data;
+
+    position = _env->GetIntField(buffer, positionID);
+    limit = _env->GetIntField(buffer, limitID);
+    elementSizeShift = _env->GetIntField(buffer, elementSizeShiftID);
+    *remaining = (limit - position) << elementSizeShift;
+    pointer = _env->CallStaticLongMethod(nioAccessClass,
+            getBasePointerID, buffer);
+    if (pointer != 0L) {
+        *array = NULL;
+        return (void *) (jint) pointer;
+    }
+
+    *array = (jarray) _env->CallStaticObjectMethod(nioAccessClass,
+            getBaseArrayID, buffer);
+    if (*array == NULL) {
+        return (void*) NULL;
+    }
+    offset = _env->CallStaticIntMethod(nioAccessClass,
+            getBaseArrayOffsetID, buffer);
+    data = _env->GetPrimitiveArrayCritical(*array, (jboolean *) 0);
+
+    return (void *) ((char *) data + offset);
+}
+
+static void
+releasePointer(JNIEnv *_env, jarray array, void *data, jboolean commit)
+{
+    _env->ReleasePrimitiveArrayCritical(array, data,
+					   commit ? 0 : JNI_ABORT);
 }
 
 static int
@@ -238,10 +274,29 @@ JNIEXPORT void JNICALL Java_com_badlogic_gdx_backends_android_AndroidGL20_glBlen
  * Signature: (IILjava/nio/Buffer;I)V
  */
 JNIEXPORT void JNICALL Java_com_badlogic_gdx_backends_android_AndroidGL20_glBufferData
-  (JNIEnv * env, jobject, jint target, jint size, jobject data, jint usage)
-{
-	void* dataPtr = getDirectBufferPointer( env, data );
-	glBufferData( target, size, dataPtr, usage );
+(JNIEnv *_env, jobject _this, jint target, jint size, jobject data_buf, jint usage) {
+    jarray _array = (jarray) 0;
+    jint _remaining;
+    GLvoid *data = (GLvoid *) 0;
+
+    if (data_buf) {
+        data = (GLvoid *)getPointer(_env, data_buf, &_array, &_remaining);
+        if (_remaining < size) {
+            _env->ThrowNew(IAEClass, "remaining() < size");
+            goto exit;
+        }
+    }
+    glBufferData(
+        (GLenum)target,
+        (GLsizeiptr)size,
+        (GLvoid *)data,
+        (GLenum)usage
+    );
+
+exit:
+    if (_array) {
+        releasePointer(_env, _array, data, JNI_FALSE);
+    }
 }
 
 /*
@@ -250,10 +305,27 @@ JNIEXPORT void JNICALL Java_com_badlogic_gdx_backends_android_AndroidGL20_glBuff
  * Signature: (IIILjava/nio/Buffer;)V
  */
 JNIEXPORT void JNICALL Java_com_badlogic_gdx_backends_android_AndroidGL20_glBufferSubData
-  (JNIEnv *env, jobject, jint target, jint offset, jint size, jobject data)
-{
-	void* dataPtr = getDirectBufferPointer( env, data );
-	glBufferSubData( target, offset, size, dataPtr );
+(JNIEnv *_env, jobject _this, jint target, jint offset, jint size, jobject data_buf) {
+  jarray _array = (jarray) 0;
+  jint _remaining;
+  GLvoid *data = (GLvoid *) 0;
+
+  data = (GLvoid *)getPointer(_env, data_buf, &_array, &_remaining);
+  if (_remaining < size) {
+      _env->ThrowNew(IAEClass, "remaining() < size");
+      goto exit;
+  }
+  glBufferSubData(
+      (GLenum)target,
+      (GLintptr)offset,
+      (GLsizeiptr)size,
+      (GLvoid *)data
+  );
+
+exit:
+  if (_array) {
+      releasePointer(_env, _array, data, JNI_FALSE);
+  }
 }
 
 /*
