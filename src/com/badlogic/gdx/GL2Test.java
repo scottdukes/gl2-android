@@ -135,13 +135,13 @@ public class GL2Test extends Activity
                        			   -0.5f, -0.5f, 0.0f,
                        			   0.5f, -0.5f, 0.0f };	
 			
-			ByteBuffer tmp = ByteBuffer.allocateDirect( 3 * 3 * 4 );
-			tmp.order(ByteOrder.nativeOrder());
-			vertices = tmp.asFloatBuffer();
+//			ByteBuffer tmp = ByteBuffer.allocateDirect( 3 * 3 * 4 );
+//			tmp.order(ByteOrder.nativeOrder());
+			vertices = FloatBuffer.wrap( new float[3 * 3] );
 			vertices.put( vVertices );
 			vertices.position(0);
 			
-			tmp = ByteBuffer.allocateDirect( 4 );
+			ByteBuffer tmp = ByteBuffer.allocateDirect( 4 );
 			tmp.order(ByteOrder.nativeOrder());			
 			IntBuffer intbuf = tmp.asIntBuffer();
 			intbuf.position(0);
