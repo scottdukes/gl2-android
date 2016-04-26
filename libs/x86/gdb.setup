@@ -1,2 +1,0 @@
-set solib-search-path /Users/badlogic/workspace/gl2-android/obj/local/x86
-directory /Users/badlogic/android-ndk-r8e/platforms/android-9/arch-x86/usr/include /Users/badlogic/android-ndk-r8e/sources/cxx-stl/system/include /Users/badlogic/workspace/gl2-android/jni
